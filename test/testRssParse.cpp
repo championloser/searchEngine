@@ -12,6 +12,7 @@ const string OFFSET_LIB = ReadConfigFile::getInstance()->find("OFFSET_LIB:");
 int main()
 {
 	RssParse rp;
-	rp.loadAndDumpFile(WEBPAGE_DIR, ".xml", PAGE_LIB, OFFSET_LIB);
+	rp.loadFile(WEBPAGE_DIR, ".xml");
+	rp.dumpFile(PAGE_LIB, OFFSET_LIB);
 	return 0;
 }

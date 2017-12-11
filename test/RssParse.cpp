@@ -13,7 +13,10 @@ using simhash::Simhasher;
 
 namespace jjx
 {
-int RssParse::loadFile(const string &dir, const string &suffix)
+RssParse::RssParse()
+: _count(0)
+{}
+int RssParse::loadAndDumpFile(const string &dir, const string &suffix, const string &pageLib, const string &offsetLib)
 {
 	GetFilenameFromDir getFilename(dir, suffix);
 	vector<string>::iterator it;
@@ -23,45 +26,52 @@ int RssParse::loadFile(const string &dir, const string &suffix)
 		Mylog::getInstance()->_root.debug("RssParse: parse '%s'...", (*it).c_str());
 		filename=dir+"/"+(*it);
 		parseRss(filename);
+		dumpFile(pageLib, offsetLib);
 	}
 	return 0;
 }
 int RssParse::dumpFile(const string &filename, const string &indexFile)
 {
-	std::ofstream ofs(filename);
-	std::ofstream ofsIndex(indexFile);
-	if(!ofs.is_open() || !ofsIndex.is_open())
-	{
-		Mylog::getInstance()->_root.debug("RssParse: dumpFile error!");
-	}
 	Mylog::getInstance()->_root.debug("RssParse: dumpFile ...");
+	std::ofstream ofs;
+	std::ofstream ofsIndex;
+	if(_count==0)
+	{
+		ofs.open(filename);
+		ofsIndex.open(indexFile);
+	}else{
+		ofs.open(filename, std::ios::app);
+		ofsIndex.open(indexFile, std::ios::app);
+	}
 	int begin;
 	int end;
 	for(size_t idx=0; idx<_rssVec.size(); ++idx)
 	{
+		++_count;
 		begin=ofs.tellp();
 		ofs<<"<doc>\n"
-		  <<"<docid>"<<idx+1<<"</docid>\n"
+		  <<"<docid>"<<_count<<"</docid>\n"
 		  <<"<title>"<<_rssVec[idx]->title<<"</title>\n"
 		  <<"<link>"<<_rssVec[idx]->link<<"</link>\n"
 		  <<"<description>"<<_rssVec[idx]->description<<"</description>\n"
 		  <<"<content>"<<_rssVec[idx]->content<<"</content>\n"
 		  <<"</doc>\n";
 		end=ofs.tellp();
-		ofsIndex<<idx+1<<" "<<begin<<" "<<end-begin<<'\n';
+		ofsIndex<<_count<<" "<<begin<<" "<<end-begin<<std::endl;
 	}
 	ofs.close();
 	ofsIndex.close();
 	_rssVec.clear();//释放内存
 	return 0;
 }
+
+const string &DICT_PATH = ReadConfigFile::getInstance()->find("DICT_PATH:");
+const string &HMM_PATH = ReadConfigFile::getInstance()->find("HMM_PATH:");
+const string &IDF_PATH = ReadConfigFile::getInstance()->find("IDF_PATH:");
+const string &STOP_WORD_PATH = ReadConfigFile::getInstance()->find("STOP_WORD_PATH:");
+
 int RssParse::parseRss(const string &filename)
 {
-	const string &DICT_PATH = ReadConfigFile::getInstance()->find("DICT_PATH:");
-	const string &HMM_PATH = ReadConfigFile::getInstance()->find("HMM_PATH:");
-	const string &IDF_PATH = ReadConfigFile::getInstance()->find("IDF_PATH:");
-	const string &STOP_WORD_PATH = ReadConfigFile::getInstance()->find("STOP_WORD_PATH:");
-
 	std::regex reg("<.+?>");
 	XMLDocument doc;	
 	doc.LoadFile(filename.c_str());

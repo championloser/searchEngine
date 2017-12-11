@@ -65,7 +65,7 @@ int CreateEnDict::dumpFile(const string &path)
 	map<string, int>::iterator it;
 	for(it=_dictionary.begin(); it!=_dictionary.end(); ++it)
 	{
-		ofs<<it->first<<" "<<it->second<<endl;
+		ofs<<it->first<<" "<<it->second<<'\n';
 	}
 	ofs.close();
 	cleanMap();//将文件dump到磁盘后调用clean将map中的内存归还给内存池
