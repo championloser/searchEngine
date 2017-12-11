@@ -1,6 +1,4 @@
 #include"../include/TaskFunc.h"
-#include"../include/int2str.h"
-#include"../include/ReadConfigFile.h"
 #include"../include/Mylog.h"
 #include"../include/CacheManager.h"
 #include"../include/Corrector.h"

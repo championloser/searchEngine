@@ -21,6 +21,7 @@ const string DICT_EN = ReadConfigFile::getInstance()->find("DICT_EN:");
 const string LIB_CN = ReadConfigFile::getInstance()->find("LIB_CN:");
 const string DICT_CN = ReadConfigFile::getInstance()->find("DICT_CN:");
 const string CACHE_FILE = ReadConfigFile::getInstance()->find("CACHE_FILE:");
+int IS_RELOADCORPUS=str2int(ReadConfigFile::getInstance()->find("IS_RELOADCORPUS:"));
 
 int main()
 {
@@ -32,13 +33,14 @@ int main()
 	ReactorThreadpool reaThrPool(acc, PTH_NUM, PTH_TASKSIZE);
 
 	CreateEnDict creEnDict;
-	creEnDict.loadFile(LIB_EN, ".txt");//创建英文词典
-	creEnDict.dumpFile(DICT_EN);//输出英文词典到文件
-
 	CreateCnDict creCnDict;
-	creCnDict.loadFile(LIB_CN, ".txt");//创建中文词典
-	creCnDict.dumpFile(DICT_CN);//输出中文词典到文件
-
+	if(IS_RELOADCORPUS)//如果不用从新加载语料库则直接使用已有词典
+	{
+		creEnDict.loadFile(LIB_EN, ".txt");//创建英文词典
+		creEnDict.dumpFile(DICT_EN);//输出英文词典到文件
+		creCnDict.loadFile(LIB_CN, ".txt");//创建中文词典
+		creCnDict.dumpFile(DICT_CN);//输出中文词典到文件
+	}
 	Corrector corr;
 	corr.loadDictionary(DICT_EN);//加载英文词典
 	corr.loadDictionary(DICT_CN);//加载中文词典
