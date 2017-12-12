@@ -1,7 +1,10 @@
+#include"../include/GlobalVariable.h"
 #include"../include/TaskFunc.h"
 #include"../include/Mylog.h"
 #include"../include/CacheManager.h"
 #include"../include/Corrector.h"
+#include"../include/StopWordDict.h"
+#include"../include/WebQuery.h"
 #include<string.h>
 #include<json/json.h>
 
@@ -35,49 +38,39 @@ int BusinessRecvData(void *p, shared_ptr<Connection> pCon)
 	pReaThrPool->addTaskToThreadPool(std::bind(pReaThrPool->_compute, pTask));
 	return 0;
 }
-int Compute(void *pCorrector, void * pCachManag, void *pReaThr, shared_ptr<Task> pTask) 
+int Compute(Corrector &corr, CacheManager &cachManag, WebQuery &webQue, cppjieba::Jieba &jieba, ReactorThreadpool &reaThr, shared_ptr<Task> pTask)
 {
-	//计算线程的任务：将传过来的数据先在线程自己的缓存中查找，
-	//缓存找不到就在词典中查找，并将结果传递给IO线程
-	//之后将查询结果记入缓存
-	CacheManager *pCachM=(CacheManager*)pCachManag;
-	Cache &myCache=pCachM->getCacheByIndex(jjx::threadIndex);
+	//计算线程的任务：将传过来的数据先用jieba分成若干关键词，去停用词
+	//传递给WebQuery，其根据关键词查询网页，返回string，再将string打包成
+	//结果放到发送任务对列，通知IO线程将其发送给客户端
+	Cache &myCache=cachManag.getCacheByIndex(jjx::threadIndex);
 	shared_ptr<vector<string>> pVec=myCache.findWord(pTask->_message);
 	if(pVec->size()==0)//如果cache中没有找到
 	{
-		Corrector *pCorr=(Corrector*)pCorrector;
-		pVec=pCorr->findWord(pTask->_message, 1);//在词典中查找最优的一个单词
-		if(pVec->size()!=0)myCache.addWord(pTask->_message, pVec);//如果词典中找到了就添加进缓存
+		pVec=corr.findWord(pTask->_message, 1);//在词典中查找最优的一个单词
 	}
-	if(pVec->size()==0)//将结果封装成Json放进_message中
+	if(pVec->size()==0)//如果词典中也没有找到,说明用户输入的很可能是多个关键词
 	{
-		Json::Value elemJson;
-		Json::Value arrJson;
-		Json::Value root;
-		elemJson["title"]="404, not found";
-		elemJson["summary"]="I cann't find what you want. what a pity!";
-		elemJson["url"]="";
-		arrJson.append(elemJson);
-		root["files"]=arrJson;
-		Json::StyledWriter sWriter;
-		pTask->_message=sWriter.write(root);
-	}else{
-		Json::Value elemJson;
-		Json::Value arrJson;
-		Json::Value root;
-		elemJson["title"]=(*pVec)[0];
-		elemJson["summary"]=(*pVec)[0];
-		elemJson["url"]="https://www.baidu.com";
-		arrJson.append(elemJson);
-		root["files"]=arrJson;
-		Json::StyledWriter sWriter;
-		pTask->_message=sWriter.write(root);
+		vector<string> words;
+		jieba.Cut(pTask->_message, words);//先分词
+		shared_ptr<vector<string>> pWords(new vector<string>);
+		StopWordDict * pStopWord=StopWordDict::getInstance(STOP_WORD_PATH);
+		for(size_t idx=0; idx<words.size(); ++idx)
+		{
+			if(!(pStopWord->isStopWordDict(words[idx])))//去停用词
+			{
+				pWords->push_back(words[idx]);
+			}
+		}
+		webQue.queryWord(pWords, pTask->_message);//查找网页
+	}else{//如果词典中找到了，说明用户输入的是一个关键词
+		myCache.addWord(pTask->_message, pVec);//先添加进缓存
+		webQue.queryWord(pVec, pTask->_message);//查找网页
 	}
 	//将结果放到任务队列
-	ReactorThreadpool *pReaThrPool=(ReactorThreadpool*)pReaThr;
-	pReaThrPool->addTaskToVeactor(pTask);
+	reaThr.addTaskToVeactor(pTask);
 	//通过eventfd通知IO线程
-	pReaThrPool->writeEventfd();
+	reaThr.writeEventfd();
 	return 0;
 }
 int BusinessSendData(void *p)

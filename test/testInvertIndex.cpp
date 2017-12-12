@@ -1,13 +1,11 @@
+#include"../include/GlobalVariable.h"
 #include"../include/InvertIndex.h"
-#include"../include/ReadConfigFile.h"
 #include<string>
 using std::string;
 using jjx::InvertIndex;
-using jjx::ReadConfigFile;
-
-const string &PAGE_LIB = ReadConfigFile::getInstance()->find("PAGE_LIB:");
-const string &OFFSET_LIB = ReadConfigFile::getInstance()->find("OFFSET_LIB:");
-const string &INVERTINDEX_LIB = ReadConfigFile::getInstance()->find("INVERTINDEX_LIB:");
+using jjx::PAGE_LIB;
+using jjx::OFFSET_LIB;
+using jjx::INVERTINDEX_LIB;
 
 int main()
 {

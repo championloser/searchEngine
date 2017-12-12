@@ -1,6 +1,6 @@
+#include"../include/GlobalVariable.h"
 #include"../include/CacheManager.h"
 #include"../include/Mylog.h"
-#include"../include/ReadConfigFile.h"
 #include<fstream>
 #include<sstream>
 using std::ifstream;
@@ -66,7 +66,7 @@ int CacheManager::updateCache()
 	{
 		_cacheVec[idx]=_cacheVec[0];
 	}
-	writeCacheToFile(ReadConfigFile::getInstance()->find("CACHE_FILE:"));//同步完后写入文件
+	writeCacheToFile(CACHE_FILE);//同步完后写入文件
 	Mylog::getInstance()->_root.debug("write cache to file successful");
 	return 0;
 }

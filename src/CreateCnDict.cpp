@@ -1,3 +1,4 @@
+#include"../include/GlobalVariable.h"
 #include"../include/CreateCnDict.h"
 #include"../include/GetFilenameFromDir.h"
 #include"../include/Mylog.h"
@@ -15,13 +16,6 @@ using jjx::ReadConfigFile;
 
 namespace jjx
 {
-
-const string DICT_PATH = ReadConfigFile::getInstance()->find("DICT_PATH:");
-const string HMM_PATH = ReadConfigFile::getInstance()->find("HMM_PATH:");
-const string USER_DICT_PATH = ReadConfigFile::getInstance()->find("USER_DICT_PATH:");
-const string IDF_PATH = ReadConfigFile::getInstance()->find("IDF_PATH:");
-const string STOP_WORD_PATH = ReadConfigFile::getInstance()->find("STOP_WORD_PATH:");
-
 int CreateCnDict::loadFile(const string &dir, const string &suffx)
 {
 	shared_ptr<GetFilenameFromDir> pGetFilenames(new GetFilenameFromDir(dir, suffx));

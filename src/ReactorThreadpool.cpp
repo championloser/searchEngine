@@ -22,7 +22,7 @@ int ReactorThreadpool::setBusinessSendData(CallbackBusinessSendType &&cb)
 }
 int ReactorThreadpool::setCompute(CallbackComputeType &&cb)
 {
-	_compute=std::bind(cb, this, std::placeholders::_1);
+	_compute=std::bind(cb, std::ref(*this), std::placeholders::_1);
 	return 0;
 }
 int ReactorThreadpool::setWriteCacheToFile(function<int(void*)> &&cb)

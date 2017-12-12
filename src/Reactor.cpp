@@ -1,8 +1,8 @@
+#include"../include/GlobalVariable.h"
 #include"../include/Reactor.h"
 #include"../include/Acceptor.h"
 #include"../include/Connection.h"
 #include"../include/Mylog.h"
-#include"../include/ReadConfigFile.h"
 #include"../include/int2str.h"
 #include<unistd.h>
 #include<string.h>
@@ -21,8 +21,7 @@ Reactor::Reactor(Acceptor &acceptor, int etfd)
 	if(-1==_epfd){perror("::epoll_create");exit(EXIT_FAILURE);}
 	addEpollinFd(_sfd);//注册sfd
 	addEpollinFd(_etfd);//注册eventfd
-	int time=str2int(ReadConfigFile::getInstance()->find("CACHE_TIME:"));
-	_timerfd.setTime(60, time);//1分钟后开始，间隔time时间后触发
+	_timerfd.setTime(60, CACHE_TIME);//1分钟后开始，间隔time时间后触发
 	addEpollinFd(_timerfd.getTfd());//注册timerfd
 }
 Reactor::~Reactor()

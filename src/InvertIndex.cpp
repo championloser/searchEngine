@@ -1,5 +1,5 @@
+#include"../include/GlobalVariable.h"
 #include"../include/InvertIndex.h"
-#include"../include/ReadConfigFile.h"
 #include"../include/Mylog.h"
 #include"../include/StopWordDict.h"
 #include<cppjieba/Jieba.hpp>
@@ -16,12 +16,6 @@ namespace jjx
 
 int InvertIndex::loadFile(const string &pageFile, const string &offsetFile)
 {
-	const string &DICT_PATH = ReadConfigFile::getInstance()->find("DICT_PATH:");
-	const string &HMM_PATH = ReadConfigFile::getInstance()->find("HMM_PATH:");
-	const string &USER_DICT_PATH = ReadConfigFile::getInstance()->find("USER_DICT_PATH:");
-	const string &IDF_PATH = ReadConfigFile::getInstance()->find("IDF_PATH:");
-	const string &STOP_WORD_PATH = ReadConfigFile::getInstance()->find("STOP_WORD_PATH:");
-
 	ifstream ifsPage(pageFile);
 	ifstream ifsOffset(offsetFile);
 	if(!ifsPage.is_open() || !ifsOffset.is_open())
@@ -84,7 +78,8 @@ int InvertIndex::dumpFile(const string &indexFile)
 	{
 		ofs<<it->first<<"\t";
 		double tmp=(_docNum*1.0)/(it->second.size());
-		idf=::log10(tmp);
+		//idf=::log10(tmp);
+		idf=tmp;
 		for(auto tmpIt=it->second.begin(); tmpIt!=it->second.end(); ++tmpIt)
 		{
 			tf=(tmpIt->second.frequency*1.0)/(tmpIt->second.length);

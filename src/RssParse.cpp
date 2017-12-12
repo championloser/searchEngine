@@ -1,8 +1,8 @@
+#include"../include/GlobalVariable.h"
 #include"../include/RssParse.h"
 #include"../include/GetFilenameFromDir.h"
 #include"../include/tinyxml2.h"
 #include"../include/Mylog.h"
-#include"../include/ReadConfigFile.h"
 #include<regex>
 #include<fstream>
 #include<simhash/Simhasher.hpp>
@@ -57,11 +57,6 @@ int RssParse::dumpFile(const string &filename, const string &indexFile)
 }
 int RssParse::parseRss(const string &filename)
 {
-	const string &DICT_PATH = ReadConfigFile::getInstance()->find("DICT_PATH:");
-	const string &HMM_PATH = ReadConfigFile::getInstance()->find("HMM_PATH:");
-	const string &IDF_PATH = ReadConfigFile::getInstance()->find("IDF_PATH:");
-	const string &STOP_WORD_PATH = ReadConfigFile::getInstance()->find("STOP_WORD_PATH:");
-
 	std::regex reg("<.+?>");
 	XMLDocument doc;	
 	doc.LoadFile(filename.c_str());

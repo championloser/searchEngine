@@ -28,7 +28,7 @@ class ReactorThreadpool
 	typedef function<int(shared_ptr<Connection>)> CallbackType;
 	typedef function<int(void*, shared_ptr<Connection>)> CallbackBusinessRecvType;
 	typedef function<int(void*)> CallbackBusinessSendType;
-	typedef function<int(void*, shared_ptr<Task>)> CallbackComputeType;
+	typedef function<int(ReactorThreadpool &, shared_ptr<Task>)> CallbackComputeType;
 public:
 	ReactorThreadpool(Acceptor &acceptor, int pthSize, int taskSize);
 	int setHandleNewCon(CallbackType &&cb);
